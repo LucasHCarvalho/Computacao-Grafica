@@ -16,6 +16,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="ComputacaoGrafica.vcxproj.user" />
+    <None Include="FragmentShader.glsl" />
+    <None Include="VertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Origem.cpp">

@@ -15,29 +15,9 @@ std::vector<Shader*> listShader;
 
 
 //Vertex Shader
-static const char* vShader = "                                \n\
-#version 330                                                  \n\
-                                                              \n\
-layout(location=0) in vec3 pos;                               \n\
-uniform mat4 model;                                           \n\
-uniform mat4 projection;                                      \n\
-out vec4 vColor;                                              \n\
-                                                              \n\
-void main(){                                                  \n\
-	gl_Position = projection * model * vec4(pos, 1.0);        \n\
-	vColor = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);              \n\
-}";
+static const char* VertexLocation = "VertexShader.glsl";
 
-static const char* fShader = "                                \n\
-#version 330                                                  \n\
-                                                              \n\
-out vec4 color;                                               \n\
-in vec4 vColor;                                               \n\
-uniform vec3 triangleColor;                                   \n\
-                                                              \n\
-void main(){                                                  \n\
-	color = vColor;                                           \n\
-}";
+static const char* FragmentLocation = "FragmentShader.glsl";
 
 
 void CriaTriangulos() {
@@ -76,7 +56,7 @@ void CriaTriangulos() {
 
 void CriaShader() {
 	Shader* shader = new Shader();
-	shader->CreateFromString(vShader, fShader);
+	shader->CreateFromFile(VertexLocation, FragmentLocation);
 	listShader.push_back(shader);
 }
 
@@ -172,7 +152,7 @@ int main() {
 		listMesh[0]->RenderMesh();
 		glm::mat4 model(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.5f, -2.0f));
-		model = glm::rotate(model, glm::radians(rotationOffset), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(rotationOffset), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.4, 0.4, 0.4));
 
 		
@@ -184,7 +164,7 @@ int main() {
 		listMesh[1]->RenderMesh();
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
-		model = glm::rotate(model, glm::radians(rotationOffset), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(rotationOffset), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.4, 0.4, 0.4));
 
 		

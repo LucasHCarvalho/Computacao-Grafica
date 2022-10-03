@@ -1,11 +1,15 @@
 #include "Shader.h"
 
 Shader::Shader() {
-
+	ShaderId = 0;
+	uniformModel = 0;
+	uniformProjection = 0;
 }
 
 Shader::~Shader() {
-
+	if (!ShaderId == 0) {
+		glDeleteProgram(ShaderId);
+	}
 }
 
 void Shader::CreateFromString(const char* vertexCode, const char* fragmetCode) {
@@ -40,4 +44,29 @@ void Shader::Compile(const char* vertexCode, const char* fragmetCode) {
 
 void Shader::UseProgram() {
 	glUseProgram(ShaderId);
+}
+
+void Shader::CreateFromFile(const char* vertexLocation, const char* fragmentLocation) {
+	std::string vertexCode = ReadFile(vertexLocation);
+	std::string fragmentCode = ReadFile(fragmentLocation);
+
+	Compile(vertexCode.c_str(), fragmentCode.c_str());
+}
+
+std::string Shader::ReadFile(const char* fileLocation) {
+	std::string content = "";
+	std::ifstream fileStream(fileLocation, std::ios::in);
+
+	if (!fileStream.is_open()) {
+		printf("O arquivo não foi encontrado (%s)", fileLocation);
+	}
+
+	std::string line;
+	while (!fileStream.eof()){
+		std::getline(fileStream, line);
+		content.append(line + "\n");
+	}
+	fileStream.close();
+
+	return content;
 }
