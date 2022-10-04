@@ -8,10 +8,12 @@
 
 #include "Mesh.h"
 #include "Shader.h"
+#include "Window.h"
 
 
 std::vector<Mesh*> listMesh;
 std::vector<Shader*> listShader;
+Window* window;
 
 
 //Vertex Shader
@@ -61,33 +63,7 @@ void CriaShader() {
 }
 
 int main() {
-	if (!glfwInit()) {
-		printf("GLFW: Não pode ser iniciado");
-		return 1;
-	}
-
-	GLFWwindow* mainWindow = glfwCreateWindow(800, 600, "Ola Mundo!", NULL, NULL);
-	if (!mainWindow) {
-		printf("GLFW: Não foi possível criar a janela");
-		glfwTerminate();
-		return 1;
-	}
-
-	int bufferWidth, bufferHeight;
-	glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
-
-	glfwMakeContextCurrent(mainWindow);
-
-	if (glewInit() != GLEW_OK) {
-		printf("Glew: Não pode ser iniciado!");
-		glfwDestroyWindow(mainWindow);
-		glfwTerminate();
-		return 1;
-	}
-
-	glEnable(GL_DEPTH_TEST);
-	glViewport(0, 0, bufferWidth, bufferHeight);
-
+	window = new Window(1024, 768);
 	CriaTriangulos();
 	CriaShader();
 
@@ -109,7 +85,7 @@ int main() {
 	float scaleOffset = 0.4f, maxScale = 0.4f, minScale = 0.0f, incScale = 0.005f;
 	bool scale = true;
 
-	while (!glfwWindowShouldClose(mainWindow)) {
+	while (!window->ShoudClose()) {
 
 		//Habilitar os eventos de usuario
 		glfwPollEvents();
@@ -172,15 +148,14 @@ int main() {
 
 		//Projeção perspectiva 3D
 		
-		glm::mat4 projection = glm::perspective(1.0f, (GLfloat)bufferWidth / (GLfloat)bufferHeight, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(1.0f, window->GetbufferWidth() / window->GetbufferHeight(), 0.1f, 100.0f);
 		glUniformMatrix4fv(shader->GetUniformProjection(), 1, GL_FALSE, glm::value_ptr(projection));
 
 		glUseProgram(0);
 
-		glfwSwapBuffers(mainWindow);
+		window->SwapBuffers();
 	}
 
-	glfwDestroyWindow(mainWindow);
-	glfwTerminate();
+	window->~Window();
 	return 0;
 }
