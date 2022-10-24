@@ -2,19 +2,18 @@
 
 Window::Window() {
 	width = 800;
-	heigth = 600;
+	height = 600;
 	Initialize();
 }
 
-Window::Window(GLint width, GLint heigth) {
+Window::Window(GLint width, GLint height) {
 	Window::width = width;
-	Window::heigth = heigth;
+	Window::height = height;
 	Initialize();
 }
 
 Window::~Window() {
 	glfwDestroyWindow(window);
-	glfwTerminate();
 }
 
 int Window::Initialize() {
@@ -27,7 +26,7 @@ int Window::Initialize() {
 		return 1;
 	}
 
-	window = glfwCreateWindow(width, heigth, "Nova janela", NULL, NULL);
+	window = glfwCreateWindow(width, height, "Nova Janela", NULL, NULL);
 	if (!window) {
 		printf("GLFW: Não foi possível criar a janela");
 		glfwTerminate();
@@ -35,7 +34,6 @@ int Window::Initialize() {
 	}
 
 	glfwGetFramebufferSize(window, &bufferWidth, &bufferHeight);
-
 	glfwMakeContextCurrent(window);
 
 	if (glewInit() != GLEW_OK) {
@@ -51,7 +49,12 @@ int Window::Initialize() {
 	CreateCallbacks();
 }
 
-void Window::hendleKeys(GLFWwindow* window, int key, int code, int action, int mode) {
+void Window::CreateCallbacks() {
+	glfwSetKeyCallback(window, handleKeys);
+	glfwSetCursorPosCallback(window, handleMouse);
+}
+
+void Window::handleKeys(GLFWwindow * window, int key, int code, int action, int mode) {
 	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
@@ -61,15 +64,41 @@ void Window::hendleKeys(GLFWwindow* window, int key, int code, int action, int m
 	if (key >= 0 && key <= 1024) {
 		if (action == GLFW_PRESS) {
 			theWindow->keys[key] = true;
-			printf("\nApertou %d\n", key);
+			printf("Apertou: %d\n", key);
 		}
-		else if (action == GLFW_RELEASE) {
+		else if(action == GLFW_RELEASE) {
 			theWindow->keys[key] = false;
-			printf("\nSoltou %d\n", key);
+			printf("Soltou: %d\n", key);
 		}
 	}
 }
 
-void Window::CreateCallbacks() {
-	glfwSetKeyCallback(window, hendleKeys);
+void Window::handleMouse(GLFWwindow* window, double xPos, double yPos) {
+	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+
+	if (theWindow->mouseFirstMove) {
+		theWindow->lastX = xPos;
+		theWindow->lastY = yPos;
+		theWindow->mouseFirstMove = false;
+	}
+
+	theWindow->xChange = xPos - theWindow->lastX;
+	theWindow->yChange = theWindow->lastY - yPos;
+
+	theWindow->lastX = xPos;
+	theWindow->lastY = yPos;
 }
+
+GLfloat Window::GetXChange() {
+	GLfloat change = xChange;
+	xChange = 0.0f;
+	return change;
+}
+
+GLfloat Window::GetYChange() {
+	GLfloat change = yChange;
+	yChange = 0.0f;
+	return change;
+}
+
+

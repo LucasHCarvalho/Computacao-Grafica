@@ -1,26 +1,37 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
-#include "iostream"
+#include <iostream>
 
 class Window
 {
 public:
 	Window();
-	~Window();
-	Window(GLint width, GLint heigth);
+	Window(GLint width, GLint height);
 	int Initialize();
-	bool ShoudClose() { return glfwWindowShouldClose(window); };
-	GLfloat GetbufferWidth() { return (GLfloat)bufferWidth; };
-	GLfloat GetbufferHeight() { return (GLfloat)bufferHeight; };
-	void SwapBuffers() { glfwSwapBuffers(window); };
+	~Window();
+	bool ShouldClose() { return glfwWindowShouldClose(window);  }
+	GLfloat GetBufferWidth() { return (GLfloat)bufferWidth; }
+	GLfloat GetBufferHeight() { return (GLfloat)bufferHeight; }
+	void SwapBuffers() { glfwSwapBuffers(window); }
+	bool* GetKeys() { return keys; }
+	GLfloat GetXChange();
+	GLfloat GetYChange();
 
 private:
 	GLFWwindow* window;
-	GLint width, heigth;
+	GLint width, height;
 	int bufferWidth, bufferHeight;
 
-	bool keys[1024];
-	static void hendleKeys(GLFWwindow* window, int key, int code, int action, int mode);
+	//Callbacks
 	void CreateCallbacks();
+
+	//teclas
+	bool keys[1024];
+	static void handleKeys(GLFWwindow * window, int key, int code, int action, int mode);
+
+	//Mouse
+	bool mouseFirstMove;
+	GLfloat lastX, lastY, xChange, yChange;
+	static void handleMouse(GLFWwindow * window, double xPos, double yPos);
 };
 

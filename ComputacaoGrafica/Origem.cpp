@@ -1,3 +1,5 @@
+#define STB_IMAGE_IMPLEMENTATION
+
 #include <iostream>
 #include <vector>
 #include "GL/glew.h"
@@ -9,34 +11,28 @@
 #include "Mesh.h"
 #include "Shader.h"
 #include "Window.h"
-
+#include "Camera.h"
+#include "Texture.h"
 
 std::vector<Mesh*> listMesh;
 std::vector<Shader*> listShader;
-Window* window;
+Window * window;
+Camera camera;
+Texture brickTexture;
+Texture groundTexture;
 
 
 //Vertex Shader
 static const char* VertexLocation = "VertexShader.glsl";
-
-static const char* FragmentLocation = "FragmentShader.glsl";
-
+static const char* FragmenetLocation = "FragmentShader.glsl";
 
 void CriaTriangulos() {
 	GLfloat vertices[] = {
 		//x , y	, z	
-		0.0f, 1.0f, 0.0f,   //Vertice 0 (Verde)
-		-1.0f, -1.0f, 0.0f, //Vertice 1 (Preto)
-		1.0f, -1.0f, 0.0f,  //Vertice 2 (Vermelho)
-		0.0f, -1.0f, 1.0f    //Vertice 3 (Azul)
-	};
-
-	GLfloat vertices2[] = {
-		//x , y	, z	
-		0.0f, 1.0f, 0.0f,   //Vertice 0 (Verde)
-		-1.0f, -1.0f, 0.0f, //Vertice 1 (Preto)
-		1.0f, -1.0f, 0.0f,  //Vertice 2 (Vermelho)
-		0.0f, -1.0f, -1.0f    //Vertice 3 (Azul)
+		0.0f, 1.0f, 0.0f, 0.5f, 1.0f,    //Vertice 0 (x,y,z,u,v)
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  //Vertice 1 (x,y,z,u,v)
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,   //Vertice 2 (x,y,z,u,v)
+		0.0f, -1.0f, 1.0f, 0.5f, 0.0f    //Vertice 3 (x,y,z,u,v)
 	};
 
 	GLuint indice[] = {
@@ -52,105 +48,102 @@ void CriaTriangulos() {
 	listMesh.push_back(obj1);
 
 	Mesh* obj2 = new Mesh();
-	obj2->CreateMesh(vertices2, sizeof(vertices2), indice, sizeof(indice));
+	obj2->CreateMesh(vertices, sizeof(vertices), indice, sizeof(indice));
 	listMesh.push_back(obj2);
+
 }
+
 
 void CriaShader() {
 	Shader* shader = new Shader();
-	shader->CreateFromFile(VertexLocation, FragmentLocation);
+	shader->CreateFromFile(VertexLocation, FragmenetLocation);
 	listShader.push_back(shader);
 }
 
+
 int main() {
 	window = new Window(1024, 768);
+
 	CriaTriangulos();
 	CriaShader();
 
-	float triangleOffsetX = 0.0f, maxOffsetX = 0.7f, minOffsetX = -0.7f, incOffsetX = 0.05f;
-	bool directionX = true;
-		
-	float triangleOffsetX1 = 0.0f, maxOffsetX1 = 0.5f, minOffsetX1 = -0.7f, incOffsetX1 = 0.01f;
-	bool directionX1 = true;
+	//Camera
+	camera = Camera(glm::vec3(0.0f,0.0f,0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 0.5f, 0.5f);
 
-	float triangleOffsetY = 0.0f, maxOffsetY = 0.7f, minOffsetY = -0.7f, incOffsetY = 0.05f;
-	bool directionY = true;
+	brickTexture = Texture((char*)"Texture/brick.png");
+	brickTexture.loadTexture();
+	groundTexture = Texture((char*)"Texture/ground.png");
+	groundTexture.loadTexture();
 
-	float triangleOffsetY1 = 0.0f, maxOffsetY1 = 0.3f, minOffsetY1 = -0.7f, incOffsetY1 = 0.001f;
-	bool directionY1 = true;
+	float triangleOffset = 0.0f, maxOffset = 0.7f, minOffset = -0.7f, incOffset = 0.05f;
+	bool direction = true;
 
 	float rotationOffset = 0.0f, maxRotation = 360.0f, minRotation = -0.1f, incRotation = 0.5f;
 	bool rotation = true;
 
-	float scaleOffset = 0.4f, maxScale = 0.4f, minScale = 0.0f, incScale = 0.005f;
+	float scaleOffset = 0.4f, maxScale = 0.7f, minScale = 0.3f, incScale = 0.005f;
 	bool scale = true;
 
-	while (!window->ShoudClose()) {
-
+	while (!window->ShouldClose()) {
+		
 		//Habilitar os eventos de usuario
 		glfwPollEvents();
 
 		glClearColor(1.0f, 0.75f, 0.79f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		camera.KeyControl(window->GetKeys());
+		camera.MouseControl(window->GetXChange(), window->GetYChange());
+
 		//Desenha o triangulo
 		Shader* shader = listShader[0];
 		shader->UseProgram();
+			
+				//Mover o triangulo
+				triangleOffset += direction ? incOffset : incOffset * -1;
+				if (triangleOffset >= maxOffset || triangleOffset <= minOffset)
+					direction = !direction;
 
-		triangleOffsetX += directionX ? incOffsetX : incOffsetX * -1;
-		if (triangleOffsetX >= maxOffsetX || triangleOffsetX <= minOffsetX)
-			directionX = !directionX;
+				//Rotação do triangulo
+				rotationOffset += rotation ? incRotation : incRotation * -1;
+				if (rotationOffset >= maxRotation || rotationOffset <= minRotation)
+					rotation = !rotation;
 
-		triangleOffsetX1 += directionX1 ? incOffsetX1 : incOffsetX1 * -1;
-		if (triangleOffsetX1 >= maxOffsetX1 || triangleOffsetX1 <= minOffsetX1)
-			directionX1 = !directionX1;
+				//Scale do triangulo
+				scaleOffset += scale ? incScale : incScale * -1;
+				if (scaleOffset >= maxScale || scaleOffset <= minScale)
+					scale = !scale;
+				
+				/*
+				* Triangulo 1
+				*/
+				brickTexture.useTexture();
+				listMesh[0]->RenderMesh();								
+				glm::mat4 model(1.0f);
+				model = glm::translate(model, glm::vec3(0.0f, 0.5f, -2.0f));
+				model = glm::rotate(model, glm::radians(rotationOffset), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 
-		triangleOffsetY += directionY ? incOffsetY : incOffsetY * -1;
-		if (triangleOffsetY >= maxOffsetY || triangleOffsetY <= minOffsetY)
-			directionY = !directionY;
+				glUniformMatrix4fv(shader->GetUniformModel(), 1, GL_FALSE, glm::value_ptr(model));
 
-		triangleOffsetY1 += directionY1 ? incOffsetY1 : incOffsetY1 * -1;
-		if (triangleOffsetY1 >= maxOffsetY1 || triangleOffsetY1 <= minOffsetY1)
-			directionY1 = !directionY1;
+				/*
+				* Triangulo 2
+				*/
+				groundTexture.useTexture();
+				listMesh[1]->RenderMesh();
+				model = glm::mat4(1.0f);
+				model = glm::translate(model, glm::vec3(0.0f, -0.5f, -5.0f));
+				model = glm::rotate(model, glm::radians(rotationOffset), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 
-		rotationOffset += rotation ? incRotation : incRotation * -1;
-		if (rotationOffset >= maxRotation || rotationOffset <= minRotation)
-			rotation = !rotation;
+				glUniformMatrix4fv(shader->GetUniformModel(), 1, GL_FALSE, glm::value_ptr(model));
 
-		scaleOffset += scale ? incScale : incScale * -1;
-		if (scaleOffset >= maxScale || scaleOffset <= minScale)
-			scale = !scale;
+				//Projeção de perspectiva 3D
+				glm::mat4 projection = glm::perspective(1.0f, window->GetBufferWidth() / window->GetBufferHeight(), 0.1f, 100.0f);
+				glUniformMatrix4fv(shader->GetUniformProjection(), 1, GL_FALSE, glm::value_ptr(projection));
 
-		
-		/*
-		* Triangulo 1
-		*/
-		listMesh[0]->RenderMesh();
-		glm::mat4 model(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.5f, -2.0f));
-		model = glm::rotate(model, glm::radians(rotationOffset), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.4, 0.4, 0.4));
-
-		
-		glUniformMatrix4fv(shader->GetUniformModel(), 1, GL_FALSE, glm::value_ptr(model));
-
-		/*
-		* Triangulo 2
-		*/
-		listMesh[1]->RenderMesh();
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
-		model = glm::rotate(model, glm::radians(rotationOffset), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.4, 0.4, 0.4));
-
-		
-		glUniformMatrix4fv(shader->GetUniformModel(), 1, GL_FALSE, glm::value_ptr(model));
-
-		//Projeção perspectiva 3D
-		
-		glm::mat4 projection = glm::perspective(1.0f, window->GetbufferWidth() / window->GetbufferHeight(), 0.1f, 100.0f);
-		glUniformMatrix4fv(shader->GetUniformProjection(), 1, GL_FALSE, glm::value_ptr(projection));
-
+				glUniformMatrix4fv(shader->GetUniformView(), 1, GL_FALSE, glm::value_ptr(camera.calculateView()));
+			
 		glUseProgram(0);
 
 		window->SwapBuffers();

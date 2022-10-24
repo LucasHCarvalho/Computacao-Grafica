@@ -5,10 +5,12 @@ class Mesh
 public:
 	Mesh();
 	~Mesh();
-	void CreateMesh(GLfloat *vertice, unsigned int numOfVertice, GLuint *indice, unsigned int numOfIndice);
+	void CreateMesh(GLfloat *vertices, unsigned int numOfVertice, GLuint *indices, unsigned int numOfIndices);
 	void RenderMesh();
+
 private:
 	GLuint VAO, VBO, VBI;
-	GLuint numOfIndice;
+	GLuint numOfIndices;
+
 };
 
