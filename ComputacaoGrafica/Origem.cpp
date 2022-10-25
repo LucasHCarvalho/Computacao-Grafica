@@ -51,6 +51,22 @@ void CriaTriangulos() {
 	obj2->CreateMesh(vertices, sizeof(vertices), indice, sizeof(indice));
 	listMesh.push_back(obj2);
 
+	GLfloat chao[] = {
+		//x , y	, z	
+		-10.0f, 0.0f, -10.0f, 0.0f, 0.0f,		//Vertice 1 (x,y,z,u,v)
+		-10.0f, 0.0f, 10.0f, 0.0f, 10.0f,		//Vertice 2 (x,y,z,u,v)
+		10.0f, 0.0f, 10.0f, 10.0f, 10.0f,		//Vertice 3 (x,y,z,u,v)
+		10.0f, 0.0f, -10.0f, 10.0f, 0.0f		//Vertice 4 (x,y,z,u,v)
+	};
+
+	GLuint indiceChao[] = {
+		0, 1, 3,
+		1, 2, 3
+	};
+
+	Mesh* obj = new Mesh();
+	obj->CreateMesh(chao, sizeof(chao), indiceChao, sizeof(indiceChao));
+	listMesh.push_back(obj);
 }
 
 
@@ -117,26 +133,35 @@ int main() {
 				/*
 				* Triangulo 1
 				*/
-				brickTexture.useTexture();
-				listMesh[0]->RenderMesh();								
+				brickTexture.useTexture();							
 				glm::mat4 model(1.0f);
 				model = glm::translate(model, glm::vec3(0.0f, 0.5f, -2.0f));
 				model = glm::rotate(model, glm::radians(rotationOffset), glm::vec3(0.0f, 1.0f, 0.0f));
 				model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
-
 				glUniformMatrix4fv(shader->GetUniformModel(), 1, GL_FALSE, glm::value_ptr(model));
+				listMesh[0]->RenderMesh();
 
 				/*
 				* Triangulo 2
 				*/
-				groundTexture.useTexture();
-				listMesh[1]->RenderMesh();
+				brickTexture.useTexture();
 				model = glm::mat4(1.0f);
 				model = glm::translate(model, glm::vec3(0.0f, -0.5f, -5.0f));
 				model = glm::rotate(model, glm::radians(rotationOffset), glm::vec3(0.0f, 1.0f, 0.0f));
-				model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
-
+				model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));				
 				glUniformMatrix4fv(shader->GetUniformModel(), 1, GL_FALSE, glm::value_ptr(model));
+				listMesh[1]->RenderMesh();
+
+				/*
+				* Chao
+				*/
+				groundTexture.useTexture();
+				model = glm::mat4(1.0f);
+				model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+				//model = glm::rotate(model, glm::radians(rotationOffset), glm::vec3(0.0f, 1.0f, 0.0f));
+				//model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
+				glUniformMatrix4fv(shader->GetUniformModel(), 1, GL_FALSE, glm::value_ptr(model));
+				listMesh[2]->RenderMesh();
 
 				//Projeção de perspectiva 3D
 				glm::mat4 projection = glm::perspective(1.0f, window->GetBufferWidth() / window->GetBufferHeight(), 0.1f, 100.0f);
